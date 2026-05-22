@@ -1,31 +1,65 @@
 from file_handler import load_plants, save_plants, log_task, get_task_count
 from datetime import date, datetime
 import uuid
+from plant_data import get_plant_profile, PLANT_PROFILES
 
+from plant_data import get_plant_profile, PLANT_PROFILES
 def add_plant():
-    print("\n  🌱 ADD NEW PLANT")
-    print("  " + "-" * 30)
-    name     = input("  Plant name        : ").strip()
-    species  = input("  Species           : ").strip()
-    water_freq = int(input("  Water every (days): "))
-    today    = str(date.today())
 
-    plants = load_plants()
-    plant  = {
-        "id": str(uuid.uuid4())[:8],
+    print("\n  🌱 ADD NEW PLANT")
+    print("  " + "-" * 35)
+
+    # SHOW AVAILABLE SPECIES
+    print("\n  🌿 Available Plant Profiles:")
+
+    for key, value in PLANT_PROFILES.items():
+        if key != "default":
+            print(f"     → {value['common_name']} ({key})")
+
+    print()
+
+    # USER INPUT
+    plant_id = input("  Plant ID      : ").strip()
+    name     = input("  Plant name    : ").strip()
+    species  = input("  Species       : ").strip().lower()
+
+    today = str(date.today())
+
+    # GET AUTOMATIC PROFILE
+    profile = get_plant_profile(species)
+
+    print(f"\n  ✅ Profile Found : {profile['common_name']}")
+    print(f"  💡 Tip           : {profile['tips']}")
+
+    print("\n  📋 AUTO CARE SCHEDULE")
+
+    for task, days in profile["care_tasks"].items():
+        print(f"     → {task:<12}: every {days} day(s)")
+
+    # CREATE CARE TASKS AUTOMATICALLY
+    care_tasks = {
+        task: {
+            "every_days": days,
+            "last_done": today
+        }
+        for task, days in profile["care_tasks"].items()
+    }
+
+    # CREATE PLANT OBJECT
+    plant = {
+        "id": plant_id,
         "name": name,
         "species": species,
-        "care_tasks": {
-            "watering":    {"every_days": water_freq, "last_done": today},
-            "fertilizing": {"every_days": 30,         "last_done": today},
-            "pruning":     {"every_days": 14,          "last_done": today},
-            "pest_check":  {"every_days": 7,           "last_done": today},
-        }
+        "tips": profile["tips"],
+        "care_tasks": care_tasks
     }
+
+    # SAVE
+    plants = load_plants()
     plants.append(plant)
     save_plants(plants)
-    print(f"  ✅ {name} added! ID: {plant['id']}")
 
+    print(f"\n  ✅ {name} added successfully!")
 def view_plants():
     plants = load_plants()
     if not plants:

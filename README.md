@@ -4,3 +4,4 @@ SMS
 Unique plant ID
 Plant information
 Random Access File
+python main.py

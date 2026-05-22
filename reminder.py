@@ -1,4 +1,4 @@
-from file_handler import load_plants
+from raf_handler import read_all_plants
 from datetime import date, datetime
 
 def get_season_tip():
@@ -13,7 +13,7 @@ def get_season_tip():
         return "Winter", "Water sparingly — plants need very little now."
 
 def check_reminders():
-    plants = load_plants()
+    plants = read_all_plants()
     today  = date.today()
     season, tip = get_season_tip()
 

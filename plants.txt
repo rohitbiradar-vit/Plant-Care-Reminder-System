@@ -1,0 +1,71 @@
+[
+    {
+        "id": "001",
+        "name": "Rose 1",
+        "species": "Rosa",
+        "care_tasks": {
+            "watering": {
+                "every_days": 2,
+                "last_done": "2026-05-21"
+            },
+            "fertilizing": {
+                "every_days": 30,
+                "last_done": "2026-05-21"
+            },
+            "pruning": {
+                "every_days": 14,
+                "last_done": "2026-05-21"
+            },
+            "pest_check": {
+                "every_days": 7,
+                "last_done": "2026-05-21"
+            }
+        }
+    },
+    {
+        "id": "002",
+        "name": "Rose 2",
+        "species": "Rosa",
+        "care_tasks": {
+            "watering": {
+                "every_days": 2,
+                "last_done": "2026-05-21"
+            },
+            "fertilizing": {
+                "every_days": 30,
+                "last_done": "2026-05-21"
+            },
+            "pruning": {
+                "every_days": 14,
+                "last_done": "2026-05-21"
+            },
+            "pest_check": {
+                "every_days": 7,
+                "last_done": "2026-05-21"
+            }
+        }
+    },
+    {
+        "id": "003",
+        "name": "Cactus 1",
+        "species": "Cactaceae",
+        "care_tasks": {
+            "watering": {
+                "every_days": 10,
+                "last_done": "2026-05-21"
+            },
+            "fertilizing": {
+                "every_days": 60,
+                "last_done": "2026-05-21"
+            },
+            "pruning": {
+                "every_days": 30,
+                "last_done": "2026-05-21"
+            },
+            "pest_check": {
+                "every_days": 14,
+                "last_done": "2026-05-21"
+            }
+        }
+    }
+]

@@ -4,40 +4,29 @@ from file_handler import view_log, load_plants, save_plants, save_report
 from datetime import date, datetime
 import time
 
+from plant_data import get_plant_profile
+from datetime import date
+
+def make_plant(pid, name, species):
+    today   = str(date.today())
+    profile = get_plant_profile(species)
+    return {
+        "id":      pid,
+        "name":    name,
+        "species": species,
+        "tips":    profile["tips"],
+        "care_tasks": {
+            task: {"every_days": days, "last_done": today}
+            for task, days in profile["care_tasks"].items()
+        }
+    }
+
 DEFAULT_PLANTS = [
-    {
-        "id": "001",
-        "name": "Rose 1",
-        "species": "Rosa",
-        "care_tasks": {
-            "watering":    {"every_days": 2,   "last_done": str(date.today())},
-            "fertilizing": {"every_days": 30,  "last_done": str(date.today())},
-            "pruning":     {"every_days": 14,  "last_done": str(date.today())},
-            "pest_check":  {"every_days": 7,   "last_done": str(date.today())},
-        }
-    },
-    {
-        "id": "002",
-        "name": "Rose 2",
-        "species": "Rosa",
-        "care_tasks": {
-            "watering":    {"every_days": 2,   "last_done": str(date.today())},
-            "fertilizing": {"every_days": 30,  "last_done": str(date.today())},
-            "pruning":     {"every_days": 14,  "last_done": str(date.today())},
-            "pest_check":  {"every_days": 7,   "last_done": str(date.today())},
-        }
-    },
-    {
-        "id": "003",
-        "name": "Cactus 1",
-        "species": "Cactaceae",
-        "care_tasks": {
-            "watering":    {"every_days": 10,  "last_done": str(date.today())},
-            "fertilizing": {"every_days": 60,  "last_done": str(date.today())},
-            "pruning":     {"every_days": 30,  "last_done": str(date.today())},
-            "pest_check":  {"every_days": 14,  "last_done": str(date.today())},
-        }
-    },
+    make_plant("001", "Rose 1",   "rosa"),
+    make_plant("002", "Rose 2",   "rosa"),
+    make_plant("003", "Cactus 1", "cactaceae"),
+    make_plant("004", "Aloe 1",   "aloe vera"),
+    make_plant("005", "Monstera", "monstera"),
 ]
 
 def load_default_plants():

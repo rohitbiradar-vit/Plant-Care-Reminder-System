@@ -17,7 +17,29 @@ def add_plant():
 
     print()
 
-    plant_id = input("  Plant ID      : ").strip()
+    # CHECK IF ID ALREADY EXISTS
+    while True:
+
+        plant_id = input("  Plant ID      : ").strip()
+
+        plants = read_all_plants()
+
+        found = False
+
+        for p in plants:
+
+            if p["id"].lower() == plant_id.lower():
+
+                found = True
+                break
+
+        if found:
+
+            print("\n  ❌ Plant ID already exists!")
+            print("  🔁 Please enter another ID.\n")
+
+        else:
+            break
     name     = input("  Plant name    : ").strip()
     species  = input("  Species       : ").strip().lower()
 

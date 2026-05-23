@@ -1,145 +1,72 @@
-from file_handler import load_plants, save_plants, log_task, get_task_count
-from datetime import date, datetime
 import uuid
-from plant_data import get_plant_profile, PLANT_PROFILES
+from file_handler import load_plants, save_plants, log_task
+from datetime import date
 
-from plant_data import get_plant_profile, PLANT_PROFILES
-def add_plant():
-
-    print("\n  🌱 ADD NEW PLANT")
-    print("  " + "-" * 35)
-
-    # SHOW AVAILABLE SPECIES
-    print("\n  🌿 Available Plant Profiles:")
-
-    for key, value in PLANT_PROFILES.items():
-        if key != "default":
-            print(f"     → {value['common_name']} ({key})")
-
-    print()
-
-    # USER INPUT
-    plant_id = input("  Plant ID      : ").strip()
-    name     = input("  Plant name    : ").strip()
-    species  = input("  Species       : ").strip().lower()
-
-    today = str(date.today())
-
-    # GET AUTOMATIC PROFILE
-    profile = get_plant_profile(species)
-
-    print(f"\n  ✅ Profile Found : {profile['common_name']}")
-    print(f"  💡 Tip           : {profile['tips']}")
-
-    print("\n  📋 AUTO CARE SCHEDULE")
-
-    for task, days in profile["care_tasks"].items():
-        print(f"     → {task:<12}: every {days} day(s)")
-
-    # CREATE CARE TASKS AUTOMATICALLY
-    care_tasks = {
-        task: {
-            "every_days": days,
-            "last_done": today
-        }
-        for task, days in profile["care_tasks"].items()
-    }
-
-    # CREATE PLANT OBJECT
-    plant = {
-        "id": plant_id,
-        "name": name,
-        "species": species,
-        "tips": profile["tips"],
-        "care_tasks": care_tasks
-    }
-
-    # SAVE
-    plants = load_plants()
-    plants.append(plant)
-    save_plants(plants)
-
-    print(f"\n  ✅ {name} added successfully!")
-def view_plants():
+def get_plants_text():
     plants = load_plants()
     if not plants:
-        print("  ⚠️  No plants registered yet.")
-        return
-    print(f"\n  🪴 YOU HAVE {len(plants)} PLANT(S)\n")
+        return "⚠️ No plants registered yet."
+    
+    msg = f"🪴 *YOU HAVE {len(plants)} PLANT(S)*\n\n"
     for p in plants:
-        print("  ╔══════════════════════════════════╗")
-        print(f"  🌿 ID      : {p['id']}")
-        print(f"     Name    : {p['name']}")
-        print(f"     Species : {p['species']}")
+        msg += f"🌿 *ID: {p['id']}*\n"
+        msg += f"Name: {p['name']}\n"
+        msg += f"Species: {p['species']}\n"
         for task, info in p["care_tasks"].items():
-            print(f"     {task:<12}: every {info['every_days']} day(s), last done {info['last_done']}")
-        print("  ╚══════════════════════════════════╝\n")
+            # FIX: Replace underscore with space so Telegram Markdown doesn't crash
+            clean_task = task.replace('_', ' ').title()
+            msg += f"  - {clean_task}: every {info['every_days']} days (last: {info['last_done']})\n"
+        msg += "━━━━━━━━━━━━━━━━━━\n"
+    return msg
 
-def log_care_task():
-    print("\n  ✅ LOG CARE TASK")
-    print("  " + "-" * 30)
-    plant_id = input("  Enter Plant ID : ").strip()
-    print("  Tasks: watering / fertilizing / pruning / pest_check")
-    task     = input("  Which task done: ").strip().lower()
-    today    = str(date.today())
-
+def log_care_task_bot(plant_id, task):
     plants = load_plants()
+    today = str(date.today())
+    
     for p in plants:
         if p["id"] == plant_id:
             if task in p["care_tasks"]:
                 p["care_tasks"][task]["last_done"] = today
                 save_plants(plants)
                 log_task(p["id"], p["name"], task, today)
-                print(f"  ✅ {task} logged for {p['name']} on {today}!")
+                return f"✅ '{task}' logged for {p['name']} on {today}!"
             else:
-                print("  ❌ Invalid task name!")
-            return
-    print("  ❌ Plant ID not found!")
+                return "❌ Invalid task name! Use: watering, fertilizing, pruning, or pest_check."
+    return "❌ Plant ID not found!"
 
-def delete_plant():
-    print("\n  🗑️  DELETE PLANT")
-    print("  " + "-" * 30)
-    plant_id = input("  Enter Plant ID to delete: ").strip()
-    plants   = load_plants()
-    new_list = [p for p in plants if p["id"] != plant_id]
-    if len(new_list) == len(plants):
-        print("  ❌ Plant ID not found!")
+def suggest_watering(plant_name):
+    """Simple database to suggest watering days based on plant name."""
+    name = plant_name.lower()
+    if "cactus" in name or "succulent" in name or "aloe" in name:
+        return 14, "Cactaceae/Succulent"
+    elif "fern" in name:
+        return 3, "Fern"
+    elif "rose" in name:
+        return 2, "Rosa"
+    elif "snake" in name or "sansevieria" in name:
+        return 21, "Sansevieria"
+    elif "pothos" in name or "monstera" in name:
+        return 10, "Araceae"
     else:
-        save_plants(new_list)
-        print(f"  ✅ Plant {plant_id} deleted!")
+        return 7, "Unknown species" 
 
-def search_plant():
-    print("\n  🔍 SEARCH PLANT")
-    print("  " + "-" * 30)
-    keyword = input("  Enter name, species or ID: ").strip().lower()
-    plants  = load_plants()
-    results = [p for p in plants if
-               keyword in p["name"].lower() or
-               keyword in p["species"].lower() or
-               keyword in p["id"].lower()]
-    if not results:
-        print("  ❌ No plants found!")
-        return
-    print(f"\n  ✅ Found {len(results)} result(s):\n")
-    for p in results:
-        print(f"  🌿 [{p['id']}] {p['name']} — {p['species']}")
-
-def plant_statistics():
+def add_plant_bot(name, species, water_freq):
+    """Saves the new plant generated by the Telegram bot."""
     plants = load_plants()
-    if not plants:
-        print("  ⚠️  No plants registered yet.")
-        return
-
-    today = date.today()
-    print("\n  📊 PLANT STATISTICS")
-    print("  " + "=" * 40)
-    print(f"  🌿 Total Plants : {len(plants)}")
-
-    for p in plants:
-        print(f"\n  [{p['id']}] {p['name']}")
-        for task, info in p["care_tasks"].items():
-            count = get_task_count(p["id"], task)
-            last  = datetime.strptime(info["last_done"], "%Y-%m-%d").date()
-            days_since = (today - last).days
-            print(f"     {task:<12}: done {count} time(s), last {days_since} day(s) ago")
-    print("  " + "=" * 40)
+    plant_id = str(uuid.uuid4())[:4] 
+    today = str(date.today())
+    
+    plant = {
+        "id": plant_id,
+        "name": name,
+        "species": species,
+        "care_tasks": {
+            "watering":    {"every_days": water_freq, "last_done": today},
+            "fertilizing": {"every_days": 30,         "last_done": today},
+            "pruning":     {"every_days": 14,         "last_done": today},
+            "pest_check":  {"every_days": 7,          "last_done": today},
+        }
+    }
+    plants.append(plant)
+    save_plants(plants)
+    return plant_id

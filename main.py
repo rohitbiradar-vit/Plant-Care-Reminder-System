@@ -1,6 +1,6 @@
 from plant_manager import add_plant, view_plants, log_care_task, delete_plant, search_plant, plant_statistics
 from reminder import check_reminders, get_season_tip
-from file_handler import view_log, load_plants, save_plants, save_report
+from file_handler import view_log, save_report
 from datetime import date, datetime
 import time
 

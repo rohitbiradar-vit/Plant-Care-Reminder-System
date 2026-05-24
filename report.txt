@@ -1,0 +1,8 @@
+🌿 PLANT CARE HEALTH REPORT 🌿
+Generated: 2026-05-23
+Season: Spring
+Tip: Water regularly — plants are growing fast!
+
+Plant: Mango (ID: 3) | Species: fruit
+Plant: Flower (ID: 1) | Species: rosa
+Plant: Aloe Vera (ID: 2) | Species: aloe vera

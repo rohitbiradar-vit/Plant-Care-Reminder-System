@@ -28,7 +28,6 @@ def add_plant_bot(plant_id, name, species):
     slot = get_total_slots()
     write_plant(slot, plant)
     
-    # Generate the rich success message with the full schedule
     msg = (f"✅ *{name}* added successfully!\n"
            f"🌿 ID: `{plant_id}`\n\n"
            f"📋 *Care Schedule:*\n")
@@ -38,7 +37,6 @@ def add_plant_bot(plant_id, name, species):
         msg += f"  - {clean_task}: every {info['every_days']} days\n"
         
     msg += f"\n💡 *Tip:* {profile['tips']}"
-    
     return msg
 
 def view_plants_bot():

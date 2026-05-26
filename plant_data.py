@@ -2,7 +2,7 @@ PLANT_PROFILES = {
     "rosa": {
         "common_name": "Rose",
         "care_tasks": {
-            "watering":    7,
+            "watering":    0,
             "fertilizing": 30,
             "pruning":     14,
             "pest_check":  7,
@@ -76,8 +76,8 @@ PLANT_PROFILES = {
         },
         "tips": "Water regularly during growth. Let bulbs dry out after flowering."
     },
-    "default": {
-        "common_name": "Unknown Plant",
+    "Mango": {
+        "common_name": "Mango",
         "care_tasks": {
             "watering":    5,
             "fertilizing": 30,

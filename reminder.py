@@ -45,7 +45,7 @@ def get_reminders_text():
             else:
                 lines.append(f"  ✅ {clean_task} — due in {days_left} day(s)")
 
-        return "\n".join(lines)
+    return "\n".join(lines)
 
 def get_due_notifications():
     """Checks for plants that need immediate attention and returns an alert string."""
@@ -69,10 +69,8 @@ def get_due_notifications():
             elif days_left == 0:
                 alerts.append(f"💧 *{p['name']}* (ID: {p['id']}) — {clean_task} is DUE TODAY!")
     
-    # If the alerts list is empty, it means no plants need care today!
     if not alerts:
         return None 
         
-    # If there are alerts, format them nicely
     msg = "🔔 *PLANT CARE ALERT*\n━━━━━━━━━━━━━━━━━━\n"
     return msg + "\n".join(alerts)

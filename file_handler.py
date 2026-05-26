@@ -1,20 +1,5 @@
-import json
-from datetime import datetime
-
-PLANTS_FILE = "plants.txt"
 LOG_FILE = "watering_log.txt"
 REPORT_FILE = "report.txt"
-
-def load_plants():
-    try:
-        with open(PLANTS_FILE, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-
-def save_plants(plants):
-    with open(PLANTS_FILE, "w") as f:
-        json.dump(plants, f, indent=4)
 
 def log_task(plant_id, plant_name, task, date):
     with open(LOG_FILE, "a") as f:

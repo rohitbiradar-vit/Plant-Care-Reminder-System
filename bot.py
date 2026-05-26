@@ -19,7 +19,6 @@ from plant_manager import (
     plant_statistics_bot
 )
 
-# ⚠️ REPLACE WITH YOUR ACTUAL BOT TOKEN
 BOT_TOKEN = "8811179067:AAEynvLbsknKUqAwRbVvEqZ9RyJUobCFR0Y"
 bot = telebot.TeleBot(BOT_TOKEN)
 admin_chat_id = None 
@@ -31,7 +30,7 @@ admin_chat_id = None
 @bot.message_handler(commands=['start', 'help', 'menu'])
 def send_menu(message):
     global admin_chat_id
-    admin_chat_id = message.chat.id
+    admin_chat_id = message.chat.id # The bot memorizes your phone here!
     
     menu_text = (
         "🌿 *PLANT CARE REMINDER SYSTEM* 🌿\n\n"
@@ -45,6 +44,7 @@ def send_menu(message):
         "/search - 🔍 Search plant\n"
         "/stats - 📊 Plant statistics\n"
         "/report - 📁 Generate health report\n"
+        "/test\\_alert - 🛠️ Force an immediate notification check\n"
     )
     bot.reply_to(message, menu_text, parse_mode='Markdown')
 
@@ -88,7 +88,6 @@ def handle_report(message):
 # INTERACTIVE MULTI-STEP COMMANDS
 # ==========================================
 
-# --- ADD PLANT (With Buttons & Auto-Naming) ---
 @bot.message_handler(commands=['add'])
 def start_add(message):
     markup = InlineKeyboardMarkup(row_width=2)
@@ -108,17 +107,27 @@ def process_add_species_selection(call):
 
     bot.answer_callback_query(call.id, f"Selected: {species_name}")
 
-    msg = bot.send_message(call.message.chat.id, f"Great choice: *{species_name}*! 🌿\n\nNow, enter a unique *Plant ID* (e.g., 007):", parse_mode='Markdown')
+    # --- Find the last used ID ---
+    plants = read_all_plants()
+    last_id_text = ""
+    if plants:
+        last_id = plants[-1]["id"]
+        last_id_text = f"\n*(Hint: The last ID used was {last_id})*"
+    # -----------------------------
+
+    msg = bot.send_message(
+        call.message.chat.id, 
+        f"Great choice: *{species_name}*! 🌿\n\nNow, enter a unique *Plant ID*{last_id_text}:", 
+        parse_mode='Markdown'
+    )
     bot.register_next_step_handler(msg, process_add_id, species_key)
 
 def process_add_id(message, species_key):
     plant_id = message.text.strip()
-    # Automatically use the species common name as the plant's name
     name = PLANT_PROFILES[species_key]["common_name"]
-    # Save the plant directly!
     bot.reply_to(message, add_plant_bot(plant_id, name, species_key), parse_mode='Markdown')
 
-# --- LOG TASK ---
+
 @bot.message_handler(commands=['log'])
 def start_log(message):
     msg = bot.reply_to(message, "✅ Enter the *Plant ID* you want to log a task for:", parse_mode='Markdown')
@@ -133,7 +142,7 @@ def process_log_task(message, plant_id):
     task = message.text.strip().lower()
     bot.reply_to(message, log_care_task_bot(plant_id, task), parse_mode='Markdown')
 
-# --- SEARCH & DELETE ---
+
 @bot.message_handler(commands=['search'])
 def start_search(message):
     msg = bot.reply_to(message, "🔍 Enter the *Plant ID* to search:")
@@ -150,15 +159,20 @@ def start_delete(message):
 # ==========================================
 def send_daily_push():
     if admin_chat_id:
-        # Call our new smart alert function
         notification = get_due_notifications()
-        
-        # Only send a message to Telegram IF there is actually something due!
         if notification:
             bot.send_message(admin_chat_id, notification, parse_mode='Markdown')
 
+@bot.message_handler(commands=['test_alert'])
+def handle_test_alert(message):
+    global admin_chat_id
+    admin_chat_id = message.chat.id
+    bot.reply_to(message, "🛠️ Checking for due plants right now...")
+    send_daily_push()
+
 def run_scheduler():
-    schedule.every().day.at("20:35").do(send_daily_push)
+    # Set this to whatever time you want the daily alert to go off (24hr format)
+    schedule.every().day.at("08:00").do(send_daily_push)
     while True:
         schedule.run_pending()
         time.sleep(1)
